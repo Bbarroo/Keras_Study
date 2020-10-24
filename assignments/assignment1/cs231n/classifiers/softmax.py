@@ -24,7 +24,7 @@ def softmax_loss_naive(W, X, y, reg):
     # Initialize the loss and gradient to zero.
     loss = 0.0
     dW = np.zeros_like(W)
-    n_train = X.shape[0]
+    num_train = X.shape[0]
     #############################################################################
     # TODO: Compute the softmax loss and its gradient using explicit loops.     #
     # Store the loss in loss and the gradient in dW. If you are not careful     #
@@ -32,10 +32,16 @@ def softmax_loss_naive(W, X, y, reg):
     # regularization!                                                           #
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-    for i in range(n_train):
-        temp_result = X[i].dot(W)
-        result = np.max(np.exp(temp_result)/np.sum(np.exp(temp_result)))
-        loss +=  -1 * np.log(result)
+    for i in range(num_train):
+        result = X[i].dot(W)
+        result -= np.max(result)
+        p = np.exp(result)/ np.sum(np.exp(result))
+        loss += -1 * np.log(p[y[i]])
+
+        temp_dW = p
+        temp_dW[y[i]] -= 1
+
+        dW += np.matmul(np.reshape(X[i],(-1,1)),np.reshape(temp_dW,(1,-1)))
 
     pass
 
@@ -59,7 +65,7 @@ def softmax_loss_vectorized(W, X, y, reg):
     # Initialize the loss and gradient to zero.
     loss = 0.0
     dW = np.zeros_like(W)
-
+    num_train = X.shape[0]
     #############################################################################
     # TODO: Compute the softmax loss and its gradient using no explicit loops.  #
     # Store the loss in loss and the gradient in dW. If you are not careful     #
@@ -69,10 +75,13 @@ def softmax_loss_vectorized(W, X, y, reg):
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     scores = X.dot(W)
-    exp_scores = np.exp(scores)
-    exp_scores = exp_scores / np.reshape(np.sum(exp_scores,axis = 1),(-1,1))
-    results = np.max(exp_scores,axis = 1)
+    scores -= np.reshape(np.max(scores,axis = 1),(-1,1))
+    p = np.exp(scores) / np.reshape(np.sum(np.exp(scores),axis = 1),(-1,1))
+    results = p[range(num_train),list(y)]
     loss = np.sum(-1 * np.log(results))
+
+    dW = X.T.dot(p)
+    dW[range(num_train),list(y)] -= 1
 
     pass
 
