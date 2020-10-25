@@ -5,6 +5,7 @@ from builtins import object
 import numpy as np
 import matplotlib.pyplot as plt
 from past.builtins import xrange
+import math
 
 class TwoLayerNet(object):
     """
@@ -79,6 +80,8 @@ class TwoLayerNet(object):
         # shape (N, C).                                                             #
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        H1 = np.maximum(0,X.dot(W1) + b1)
+        scores = H1.dot(W2) + b2
 
         pass
 
@@ -97,7 +100,14 @@ class TwoLayerNet(object):
         # classifier loss.                                                          #
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        scores -= np.reshape(np.max(scores,axis = 1),(-1,1))
+        p = np.exp(scores) / np.reshape(np.sum(np.exp(scores),axis = 1),(-1,1))
+        results = p[range(N),list(y)]
+        loss = np.sum(-1 * np.log(results))
 
+        loss /= N
+
+        loss = loss + reg * (np.sum(W1 * W1) + np.sum(W2 * W2))
         pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -110,6 +120,21 @@ class TwoLayerNet(object):
         # grads['W1'] should store the gradient on W1, and be a matrix of same size #
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        
+
+        min_scores = scores - np.reshape(np.max(scores,axis = 1),(-1,1))
+        p = np.exp(min_scores)/np.reshape(np.sum(np.exp(min_scores),axis = 1),(-1,1))
+        p[range(N),list(y)] -= 1
+        grads['W2'] = H1.T.dot(p)
+        dH = p.dot(W2.T)
+        dH[H1 == 0] = 0
+        grads['W1'] = X.T.dot(dH)
+
+        grads['W1'] /= N
+        grads['W2'] /= N
+
+        grads['W1'] += 2*reg * W1
+        grads['W2'] += 2*reg * W2
 
         pass
 
