@@ -80,8 +80,10 @@ def softmax_loss_vectorized(W, X, y, reg):
     results = p[range(num_train),list(y)]
     loss = np.sum(-1 * np.log(results))
 
+    p[range(num_train),list(y)] -= 1
+    
     dW = X.T.dot(p)
-    dW[range(num_train),list(y)] -= 1
+    
 
     pass
 
