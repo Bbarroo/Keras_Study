@@ -203,7 +203,16 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # might prove to be helpful.                                          #
         #######################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        sample_mean = np.mean(x,axis = 0)
+        sample_var = np.var(x,axis = 0)
 
+        x_hat = (x - sample_mean)/np.sqrt(sample_var + eps)
+        out = gamma * x_hat + beta
+
+        running_mean = momentum * running_mean + (1 - momentum) * sample_mean
+        running_var = momentum * running_var + (1 - momentum) * sample_var
+
+        cache = (x,gamma,beta)
         pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
